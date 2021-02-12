@@ -6,7 +6,7 @@ USE employee_db;
 
 CREATE TABLE department (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    department_name VARCHAR(30) NOT NULL,   
+    department_name VARCHAR(30) NOT NULL
 );
  CREATE TABLE role (
      id INT AUTO_INCREMENT PRIMARY KEY,
@@ -25,5 +25,3 @@ CREATE TABLE department (
      FOREIGN KEY (role_id) REFERENCES role(id),
      FOREIGN KEY (manager_id) REFERENCES employee(id)
  );
-
-
