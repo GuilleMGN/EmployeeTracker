@@ -15,6 +15,18 @@ const connection = mysql.createConnection({
 // Connect to the MySQL server and SQL database
 connection.connect(function (err) {
     if (err) throw err;
+    console.log("__________________________________________");
+    console.log("");
+    console.log("  ___        __        __       ___  ___");
+    console.log(" |__   |\\/| |__) |    /  \\ \\ / |__  |__ ");
+    console.log(" |___  |  | |    |___ \\__/  |  |___ |___");
+    console.log("");
+    console.log("   ___  __        __        ___  __  ");
+    console.log("    |  |__)  /\\  /  ` |__/ |__  |__) ");
+    console.log("    |  |  \\ /~~\\ \\__, |  \\ |___ |  \\ ");
+    console.log("__________________________________________");
+    console.log("");
+    console.log("WELCOME! ");
     // Run the main menu function after the connection is made to prompt the user
     mainMenu();
 });
@@ -56,7 +68,7 @@ function addMenu() {
             name: "action",
             type: "list",
             message: "What would you like to add? ",
-            choices: ["Add Department", "Add Role", "Add Employee"]
+            choices: ["Add Department", "Add Role", "Add Employee", "<= Back"]
         }
     ]).then((data) => {
         // Based on user answer, call the appropriate functions
@@ -70,6 +82,9 @@ function addMenu() {
             case "Add Employee":
                 addEmployee();
                 break;
+            case "<= Back":
+                mainMenu();
+                break;
             default: connection.end();
         }
     });
@@ -81,7 +96,7 @@ function viewMenu() {
             name: "action",
             type: "list",
             message: "What would you like to view? ",
-            choices: ["View Departments", "View Roles", "View Employees"]
+            choices: ["View Departments", "View Roles", "View Employees", "<= Back"]
         }
     ]).then((data) => {
         // Based on user answer, call the appropriate functions
@@ -101,6 +116,9 @@ function viewMenu() {
             case "View Departments Total Budget":
                 viewBudget();
                 break;
+            case "<= Back":
+                mainMenu();
+                break;
             default: connection.end();
         }
     });
@@ -112,7 +130,7 @@ function updateMenu() {
             name: "action",
             type: "list",
             message: "What would you like to update? ",
-            choices: ["Update Roles", "Update Managers"]
+            choices: ["Update Roles", "Update Managers", "<= Back"]
         }
     ]).then((data) => {
         // Based on user answer, call the appropriate functions
@@ -122,6 +140,9 @@ function updateMenu() {
                 break;
             case "Update Managers":
                 updateManagers();
+                break;
+            case "<= Back":
+                mainMenu();
                 break;
             default: connection.end();
         }
@@ -134,7 +155,7 @@ function deleteMenu() {
             name: "action",
             type: "list",
             message: "What would you like to delete? ",
-            choices: ["Delete Departments", "Delete Roles", "Delete Employees"]
+            choices: ["Delete Departments", "Delete Roles", "Delete Employees", "<= Back"]
         }
     ]).then((data) => {
         // Based on user answer, call the appropriate functions
@@ -148,6 +169,9 @@ function deleteMenu() {
             case "Delete Employees":
                 deleteEmployees();
                 break;
+            case "<= Back":
+                mainMenu();
+                break;
             default: connection.end();
         }
     });
@@ -157,25 +181,22 @@ function deleteMenu() {
 function viewEmployees() {
     // Display chart in console.table()
     connection.query("SELECT * FROM employee").then(res => {
-        console.log("\n");
         printTable(res);
         mainMenu();
     });
 }
-
+// function to view all departments
 function viewDepartments() {
     // Display chart in console.table()
     connection.query("SELECT * FROM department").then(res => {
-        console.log("\n");
         printTable(res);
         mainMenu();
     });
 }
-
+// function to view all roles
 function viewRoles() {
     // Display chart in console.table()
     connection.query("SELECT * FROM role").then(res => {
-        console.log("\n");
         printTable(res);
         mainMenu();
     });
