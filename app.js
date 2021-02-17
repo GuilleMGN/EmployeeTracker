@@ -180,15 +180,28 @@ function deleteMenu() {
 // function to view all employees
 function viewEmployees() {
     // Display chart in console.table()
-    connection.query("SELECT * FROM employee").then(res => {
-        printTable(res);
-        mainMenu();
-    });
+    connection.query("SELECT e.id AS ID, " +
+        "e.first_name AS FirstName, " +
+        "e.last_name AS LastName, " +
+        "r.title AS Title, " +
+        "d.department_name AS Department, " +
+        "r.salary AS Salary, " +
+        "concat(m.first_name, ' ' ,  m.last_name) AS Manager " +
+        "FROM employee e " +
+        "LEFT JOIN employee m ON e.manager_id = m.id " +
+        "INNER JOIN role r ON e.role_id = r.id " +
+        "INNER JOIN department d ON r.department_id = d.id " +
+        "ORDER BY ID ASC").then(res => {
+            printTable(res);
+            mainMenu();
+        });
 }
 // function to view all departments
 function viewDepartments() {
     // Display chart in console.table()
-    connection.query("SELECT * FROM department").then(res => {
+    connection.query("SELECT d.id AS ID, " +
+    "d.department_name AS Department " +
+    "FROM department d").then(res => {
         printTable(res);
         mainMenu();
     });
@@ -196,7 +209,12 @@ function viewDepartments() {
 // function to view all roles
 function viewRoles() {
     // Display chart in console.table()
-    connection.query("SELECT * FROM role").then(res => {
+    connection.query("SELECT r.id AS ID, " + 
+    "r.title AS Title, " +
+    "r.salary AS Salary, " +
+    "d.department_name AS Department " +
+    "FROM role r " +
+    "INNER JOIN department d ON r.department_id = d.id ").then(res => {
         printTable(res);
         mainMenu();
     });
