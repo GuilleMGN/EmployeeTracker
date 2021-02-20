@@ -97,7 +97,7 @@ function viewMenu() {
             name: "action",
             type: "list",
             message: "What would you like to view? ",
-            choices: ["View Departments", "View Roles", "View Employees", "View Employees By Manager", "View Departments Total Budget", "<= Back"]
+            choices: ["View Departments", "View Roles", "View Employees", "View Employees By Manager", "<= Back"]
         }
     ]).then((data) => {
         // Based on user answer, call the appropriate functions
@@ -113,9 +113,6 @@ function viewMenu() {
                 break;
             case "View Employees By Manager":
                 viewEmployeesByManager();
-                break;
-            case "View Departments Total Budget":
-                viewBudget();
                 break;
             case "<= Back":
                 mainMenu();
@@ -177,6 +174,7 @@ function deleteMenu() {
         }
     });
 }
+// Create array for all roles
 let roleArr = [];
 function roles() {
     connection.query("SELECT * FROM role", function (err, res) {
@@ -187,6 +185,7 @@ function roles() {
     });
     return roleArr;
 }
+// Create array for all employees (potential managers)
 let managerArr = [];
 function managers() {
     connection.query("SELECT first_name, last_name FROM employee", function (err, res) {
@@ -197,7 +196,7 @@ function managers() {
     });
     return managerArr;
 }
-// function to view all departments
+// Function to view all departments
 function viewDepartments() {
     // Display chart in console.table()
     connection.query("SELECT d.id AS ID, " +
@@ -207,7 +206,7 @@ function viewDepartments() {
             mainMenu();
         });
 }
-// function to view all employees
+// Function to view all employees
 function viewEmployees() {
     // Display chart in console.table()
     connection.query("SELECT e.id AS ID, " +
@@ -226,13 +225,14 @@ function viewEmployees() {
             mainMenu();
         });
 }
+// Function to view all employees by manager
 function viewEmployeesByManager() {
     inquirer.prompt([
         {
             name: "confirm",
             type: "list",
-            message: "All employees will be shown. Select under which worker's employees you want to see. ",
-            choices: ["OK", "<= Back"]
+            message: "INSTRUCTIONS: All employees will be shown. Select the name under which employees you want to see from them. \n",
+            choices: ["Got it"]
         },
         {
             name: "manager",
@@ -242,10 +242,7 @@ function viewEmployeesByManager() {
         }
     ]).then(data => {
         switch (data.confirm) {
-            case "OK":
-                break;
-            case "<= Back":
-                mainMenu();
+            case "Got it":
                 break;
             default: connection.end();
         }
@@ -256,7 +253,7 @@ function viewEmployeesByManager() {
             "employee.last_name AS LastName " +
             "FROM employee " +
             "WHERE employee.manager_id = " + managerID).then(res => {
-                if (res[1] === undefined) {
+                if (res[0] === undefined) {
                     console.log("There are no employees working for " + data.manager + ".");
                     mainMenu();
                 }
@@ -267,13 +264,6 @@ function viewEmployeesByManager() {
             });
     })
 }
-// function viewBudget() {
-//     connection.query("SELECT d.id AS ID, " +"d.department_name AS Department " + "FROM department d")
-
-//         .then(res => {
-//             console.log(res);
-//         });
-// }
 // function to view all roles
 function viewRoles() {
     // Display chart in console.table()
@@ -362,8 +352,6 @@ function addEmployee() {
     ]).then(data => {
         const roleID = roles().indexOf(data.role) + 1;
         const managerID = managers().indexOf(data.manager) + 1;
-        console.log(data.manager);
-        console.log(managerID);
         connection.query("INSERT INTO employee SET ?",
             {
                 first_name: data.first,
@@ -374,13 +362,13 @@ function addEmployee() {
             function (err, res) {
                 if (err) throw err;
                 console.log("Success! ");
+                managerArr = [];
                 viewEmployees();
             });
     })
 }
 function updateRoles() {
-    console.log(managers());
-    // connection.query();
+    
 }
 // function updateManagers() {
 
