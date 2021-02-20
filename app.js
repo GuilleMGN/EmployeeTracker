@@ -200,26 +200,26 @@ function viewEmployees() {
 function viewDepartments() {
     // Display chart in console.table()
     connection.query("SELECT d.id AS ID, " +
-    "d.department_name AS Department " +
-    "FROM department d").then(res => {
-        printTable(res);
-        mainMenu();
-    });
+        "d.department_name AS Department " +
+        "FROM department d").then(res => {
+            printTable(res);
+            mainMenu();
+        });
 }
 // function to view all roles
 function viewRoles() {
     // Display chart in console.table()
-    connection.query("SELECT r.id AS ID, " + 
-    "r.title AS Title, " +
-    "r.salary AS Salary, " +
-    "d.department_name AS Department " +
-    "FROM role r " +
-    "INNER JOIN department d ON r.department_id = d.id ").then(res => {
-        printTable(res);
-        mainMenu();
-    });
+    connection.query("SELECT r.id AS ID, " +
+        "r.title AS Title, " +
+        "r.salary AS Salary, " +
+        "d.department_name AS Department " +
+        "FROM role r " +
+        "INNER JOIN department d ON r.department_id = d.id ").then(res => {
+            printTable(res);
+            mainMenu();
+        });
 }
-
+// Function to add new department
 function addDepartment() {
     inquirer.prompt([{
         name: "department",
@@ -227,19 +227,19 @@ function addDepartment() {
         message: "What is the name of the new department? "
     }]).then(data => {
         connection.query("INSERT INTO department SET department_name=?", data.department).then(res => {
-            console.log(res);
+            console.log("Success! ");
             viewDepartments();
         });
     })
 }
+// Function to add new role
 async function addRole() {
     const departments = await connection.query("SELECT * FROM department");
-    console.log(departments);
     const deptArray = departments.map(({ department_name, id }) => ({
         name: department_name,
         value: id
-    }
-    ))
+    }));
+    console.log(deptArray);
     inquirer.prompt([
         {
             name: "title",
@@ -258,9 +258,83 @@ async function addRole() {
             choices: deptArray
         }
     ]).then(data => {
-        console.log(data);
+        for (var i = 0; i < deptArray; i++) {
+            if (data.department === deptArray[i].name) {
+                var departmentID = deptArray[i].value;
+            }
+        }
+        connection.query(`INSERT INTO role (title, salary, department_id) 
+        VALUES ('${data.title}', ${data.salary}, ${departmentID})`, (err, res) => {
+            if (err) throw err;
+            console.log("This works");
+            viewRoles();
+        })
+    });
+}
+
+const roleArr = [];
+function roles() {
+    connection.query("SELECT * FROM role", function (err, res) {
+        if (err) throw err;
+        for (var i = 0; i < res.length; i++) {
+            roleArr.push(res[i].title);
+        }
+    });
+    return roleArr;
+}
+const managerArr = [];
+function managers() {
+    connection.query("SELECT first_name, last_name FROM employee WHERE manager_id IS NULL", function (err, res) {
+        if (err) throw err;
+        for (var i = 0; i < res.length; i++) {
+            managerArr.push(res[i].first_name);
+        }
+    });
+    return managerArr;
+}
+
+function addEmployee() {
+    inquirer.prompt([
+        {
+            name: "first",
+            type: "input",
+            message: "What is the employee's first name? "
+        },
+        {
+            name: "last",
+            type: "input",
+            message: "What is the employee's last name? "
+        },
+        {
+            name: "role",
+            type: "list",
+            message: "What is the employee's role? ",
+            choices: roles()
+        },
+        {
+            name: "manager",
+            type: "list",
+            message: "Who is the employee's manager? ",
+            choices: managers()
+        }
+    ]).then(data => {
+        const roleID = roles().indexOf(data.role) + 1;
+        const managerID = managers().indexOf(data.manager) + 1;
+        connection.query("INSERT INTO employee SET ?",
+            {
+                first_name: data.first,
+                last_name: data.last,
+                role_id: roleID,
+                manager_id: managerID
+            },
+            function (err, res) {
+                if (err) throw err;
+                console.log("Success! ");
+                viewEmployees();
+            });
     })
 }
+
 
 // connection.query("SELECT employee.id, " +
 // "employee.first_name AS FirstName, " +
