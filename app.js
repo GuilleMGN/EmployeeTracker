@@ -2,6 +2,7 @@ const mysql = require("mysql");
 const util = require("util");
 const inquirer = require("inquirer");
 const { printTable } = require("console-table-printer");
+const { listenerCount } = require("events");
 
 // Create the connection information for the SQL database
 const connection = mysql.createConnection({
@@ -96,7 +97,7 @@ function viewMenu() {
             name: "action",
             type: "list",
             message: "What would you like to view? ",
-            choices: ["View Departments", "View Roles", "View Employees", "<= Back"]
+            choices: ["View Departments", "View Roles", "View Employees", "View Employees By Manager", "View Departments Total Budget", "<= Back"]
         }
     ]).then((data) => {
         // Based on user answer, call the appropriate functions
@@ -176,7 +177,36 @@ function deleteMenu() {
         }
     });
 }
-
+let roleArr = [];
+function roles() {
+    connection.query("SELECT * FROM role", function (err, res) {
+        if (err) throw err;
+        for (var i = 0; i < res.length; i++) {
+            roleArr.push(res[i].title);
+        }
+    });
+    return roleArr;
+}
+let managerArr = [];
+function managers() {
+    connection.query("SELECT first_name, last_name FROM employee", function (err, res) {
+        if (err) throw err;
+        for (var i = 0; i < res.length; i++) {
+            managerArr.push(res[i].first_name + " " + res[i].last_name);
+        }
+    });
+    return managerArr;
+}
+// function to view all departments
+function viewDepartments() {
+    // Display chart in console.table()
+    connection.query("SELECT d.id AS ID, " +
+        "d.department_name AS Department " +
+        "FROM department d").then(res => {
+            printTable(res);
+            mainMenu();
+        });
+}
 // function to view all employees
 function viewEmployees() {
     // Display chart in console.table()
@@ -196,16 +226,54 @@ function viewEmployees() {
             mainMenu();
         });
 }
-// function to view all departments
-function viewDepartments() {
-    // Display chart in console.table()
-    connection.query("SELECT d.id AS ID, " +
-        "d.department_name AS Department " +
-        "FROM department d").then(res => {
-            printTable(res);
-            mainMenu();
-        });
+function viewEmployeesByManager() {
+    inquirer.prompt([
+        {
+            name: "confirm",
+            type: "list",
+            message: "All employees will be shown. Select under which worker's employees you want to see. ",
+            choices: ["OK", "<= Back"]
+        },
+        {
+            name: "manager",
+            type: "list",
+            message: "Which manager's employees do you want to view? ",
+            choices: managers()
+        }
+    ]).then(data => {
+        switch (data.confirm) {
+            case "OK":
+                break;
+            case "<= Back":
+                mainMenu();
+                break;
+            default: connection.end();
+        }
+        const managerID = managers().indexOf(data.manager) + 1;
+        console.log("Showing employees working for " + data.manager + "...");
+        connection.query("SELECT employee.id AS ID, " +
+            "employee.first_name AS FirstName, " +
+            "employee.last_name AS LastName " +
+            "FROM employee " +
+            "WHERE employee.manager_id = " + managerID).then(res => {
+                if (res[1] === undefined) {
+                    console.log("There are no employees working for " + data.manager + ".");
+                    mainMenu();
+                }
+                else {
+                    printTable(res);
+                    mainMenu();
+                }
+            });
+    })
 }
+// function viewBudget() {
+//     connection.query("SELECT d.id AS ID, " +"d.department_name AS Department " + "FROM department d")
+
+//         .then(res => {
+//             console.log(res);
+//         });
+// }
 // function to view all roles
 function viewRoles() {
     // Display chart in console.table()
@@ -258,39 +326,13 @@ async function addRole() {
             choices: deptArray
         }
     ]).then(data => {
-        for (var i = 0; i < deptArray; i++) {
-            if (data.department === deptArray[i].name) {
-                var departmentID = deptArray[i].value;
-            }
-        }
         connection.query(`INSERT INTO role (title, salary, department_id) 
-        VALUES ('${data.title}', ${data.salary}, ${departmentID})`, (err, res) => {
+        VALUES ('${data.title}', ${data.salary}, ${data.department})`, (err, res) => {
             if (err) throw err;
-            console.log("This works");
+            console.log("Success! ");
             viewRoles();
         })
     });
-}
-
-const roleArr = [];
-function roles() {
-    connection.query("SELECT * FROM role", function (err, res) {
-        if (err) throw err;
-        for (var i = 0; i < res.length; i++) {
-            roleArr.push(res[i].title);
-        }
-    });
-    return roleArr;
-}
-const managerArr = [];
-function managers() {
-    connection.query("SELECT first_name, last_name FROM employee WHERE manager_id IS NULL", function (err, res) {
-        if (err) throw err;
-        for (var i = 0; i < res.length; i++) {
-            managerArr.push(res[i].first_name);
-        }
-    });
-    return managerArr;
 }
 
 function addEmployee() {
@@ -320,6 +362,8 @@ function addEmployee() {
     ]).then(data => {
         const roleID = roles().indexOf(data.role) + 1;
         const managerID = managers().indexOf(data.manager) + 1;
+        console.log(data.manager);
+        console.log(managerID);
         connection.query("INSERT INTO employee SET ?",
             {
                 first_name: data.first,
@@ -334,18 +378,19 @@ function addEmployee() {
             });
     })
 }
+function updateRoles() {
+    console.log(managers());
+    // connection.query();
+}
+// function updateManagers() {
 
+// }
+// function deleteDepartments() {
 
-// connection.query("SELECT employee.id, " +
-// "employee.first_name AS FirstName, " +
-// "employee.last_name AS LastName, " +
-// "title AS Title, " +
-// "department_name AS Department, " +
-// "salary AS Salary, " +
-// "employee.manager_id AS Manager " + 
-// "FROM employee " + 
-// "LEFT JOIN employee ON employee.manager_id = employee.id " + 
-// "INNER JOIN role ON employee.role_id = role.id " + 
-// "INNER JOIN department ON role.department_id = department.id ", (err, res) => {
-//     if (err) throw err;
-//     console.table(res);
+// }
+// function deleteRoles() {
+
+// }
+// function deleteEmployees() {
+
+// }
