@@ -4,6 +4,8 @@ CREATE DATABASE employee_db;
 
 USE employee_db;
 
+SET GLOBAL FOREIGN_KEY_CHECKS=0;
+
 CREATE TABLE department (
     id INT AUTO_INCREMENT PRIMARY KEY,
     department_name VARCHAR(30) NOT NULL 
