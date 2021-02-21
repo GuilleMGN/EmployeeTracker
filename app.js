@@ -2,7 +2,6 @@ const mysql = require("mysql");
 const util = require("util");
 const inquirer = require("inquirer");
 const { printTable } = require("console-table-printer");
-const { listenerCount } = require("events");
 // Create the connection information for the SQL database
 const connection = mysql.createConnection({
     host: "localhost",
@@ -217,7 +216,6 @@ function employees() {
 }
 // Function to view all departments
 function viewDepartments() {
-    // Display chart in console.table()
     connection.query("SELECT d.id AS ID, " +
         "d.department_name AS Department " +
         "FROM department d").then(res => {
@@ -227,7 +225,6 @@ function viewDepartments() {
 }
 // Function to view all roles
 function viewRoles() {
-    // Display chart in console.table()
     connection.query("SELECT r.id AS ID, " +
         "r.title AS Title, " +
         "r.salary AS Salary, " +
@@ -240,7 +237,6 @@ function viewRoles() {
 }
 // Function to view all employees
 function viewEmployees() {
-    // Display chart in console.table()
     connection.query("SELECT e.id AS ID, " +
         "e.first_name AS FirstName, " +
         "e.last_name AS LastName, " +

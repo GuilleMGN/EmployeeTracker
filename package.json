@@ -1,0 +1,27 @@
+{
+  "name": "EmployeeTracker",
+  "version": "1.0.0",
+  "description": "## Description This project is designed to allow a user to add, view, update and delete departments, roles, and employees within their business to keep track of everyone and maintain organization. The application runs in the console using Node JS and MySQL.",
+  "main": "app.js",
+  "dependencies": {
+    "console-table-printer": "^2.7.5",
+    "inquirer": "^7.3.3",
+    "mysql": "^2.18.1",
+    "util": "^0.12.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GuilleMGN/EmployeeTracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GuilleMGN/EmployeeTracker/issues"
+  },
+  "homepage": "https://github.com/GuilleMGN/EmployeeTracker#readme"
+}
