@@ -3,7 +3,6 @@ const util = require("util");
 const inquirer = require("inquirer");
 const { printTable } = require("console-table-printer");
 const { listenerCount } = require("events");
-
 // Create the connection information for the SQL database
 const connection = mysql.createConnection({
     host: "localhost",
@@ -12,7 +11,6 @@ const connection = mysql.createConnection({
     password: "password",
     database: "employee_db"
 });
-
 // Connect to the MySQL server and SQL database
 connection.connect(function (err) {
     if (err) throw err;
@@ -31,9 +29,7 @@ connection.connect(function (err) {
     // Run the main menu function after the connection is made to prompt the user
     mainMenu();
 });
-
 connection.query = util.promisify(connection.query);
-
 // Initial function which prompts the user for what action they should take
 function mainMenu() {
     inquirer.prompt([
@@ -62,7 +58,7 @@ function mainMenu() {
         }
     });
 }
-
+// Menu function displaying all add functions
 function addMenu() {
     inquirer.prompt([
         {
@@ -90,7 +86,7 @@ function addMenu() {
         }
     });
 }
-
+// Menu function displaying all view functions
 function viewMenu() {
     inquirer.prompt([
         {
@@ -121,7 +117,7 @@ function viewMenu() {
         }
     });
 }
-
+// Menu function displaying all update functions
 function updateMenu() {
     inquirer.prompt([
         {
@@ -143,7 +139,7 @@ function updateMenu() {
         }
     });
 }
-
+// Menu function displaying all delete functions
 function deleteMenu() {
     inquirer.prompt([
         {
@@ -394,7 +390,7 @@ function addEmployee() {
             });
     })
 }
-// Function to update roles
+// Function to update role
 function updateRoles() {
     inquirer.prompt([
         {
@@ -440,6 +436,7 @@ function updateRoles() {
         })
     });
 }
+// Function to delete department
 function deleteDepartments() {
     inquirer.prompt([
         {
@@ -467,6 +464,7 @@ function deleteDepartments() {
             });
     });
 }
+// Function to delete role
 function deleteRoles() {
     inquirer.prompt([
         {
@@ -493,6 +491,7 @@ function deleteRoles() {
             });
     });
 }
+// Function to delete emplotee
 function deleteEmployees() {
     inquirer.prompt([
         {
