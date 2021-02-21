@@ -171,6 +171,21 @@ function deleteMenu() {
         }
     });
 }
+// Validation for string inputs
+function validateString(str) {
+    if (str !== "") {
+        return true;
+    }
+    return "Invalid entry, try again! "
+}
+// Validation for integer inputs
+function validateInt(int) {
+    const pass = int.match(/^-?\d+\.?\d*$/);
+    if (pass) {
+        return true;
+    }
+    return "Please enter a valid number! ";
+}
 // Create array for all departments
 let departmentArr = [];
 function departments() {
@@ -182,7 +197,6 @@ function departments() {
     });
     return departmentArr;
 }
-
 // Create array for all roles
 let roleArr = [];
 function roles() {
@@ -211,6 +225,19 @@ function viewDepartments() {
     connection.query("SELECT d.id AS ID, " +
         "d.department_name AS Department " +
         "FROM department d").then(res => {
+            printTable(res);
+            mainMenu();
+        });
+}
+// Function to view all roles
+function viewRoles() {
+    // Display chart in console.table()
+    connection.query("SELECT r.id AS ID, " +
+        "r.title AS Title, " +
+        "r.salary AS Salary, " +
+        "d.department_name AS Department " +
+        "FROM role r " +
+        "INNER JOIN department d ON r.department_id = d.id ").then(res => {
             printTable(res);
             mainMenu();
         });
@@ -273,28 +300,16 @@ function viewEmployeesByManager() {
             });
     });
 }
-// Function to view all roles
-function viewRoles() {
-    // Display chart in console.table()
-    connection.query("SELECT r.id AS ID, " +
-        "r.title AS Title, " +
-        "r.salary AS Salary, " +
-        "d.department_name AS Department " +
-        "FROM role r " +
-        "INNER JOIN department d ON r.department_id = d.id ").then(res => {
-            printTable(res);
-            mainMenu();
-        });
-}
 // Function to add new department
 function addDepartment() {
     inquirer.prompt([{
         name: "department",
         type: "input",
-        message: "What is the name of the new department? "
+        message: "What is the name of the new department? ",
+        validate: validateString
     }]).then(data => {
-        connection.query("INSERT INTO department SET department_name=?", data.department).then(res => {
-            console.log("Success! ");
+        connection.query("INSERT INTO department SET department_name=?", data.department.trim()).then(res => {
+            console.log("Successfully added " + data.department);
             viewDepartments();
         });
     })
@@ -310,12 +325,14 @@ async function addRole() {
         {
             name: "title",
             type: "input",
-            message: "What is the title for this role? "
+            message: "What is the title for this role? ",
+            validate: validateString
         },
         {
             name: "salary",
             type: "input",
-            message: "What is the salary for the new role? "
+            message: "What is the salary for the new role? ",
+            validate: validateInt
         },
         {
             name: "department",
@@ -325,9 +342,9 @@ async function addRole() {
         }
     ]).then(data => {
         connection.query(`INSERT INTO role (title, salary, department_id) 
-        VALUES ('${data.title}', ${data.salary}, ${data.department})`, (err, res) => {
+        VALUES ('${data.title.trim()}', ${data.salary}, ${data.department})`, (err, res) => {
             if (err) throw err;
-            console.log("Success! ");
+            console.log("Successfully added " + data.title);
             viewRoles();
         })
     });
@@ -338,12 +355,14 @@ function addEmployee() {
         {
             name: "first",
             type: "input",
-            message: "What is the employee's first name? "
+            message: "What is the employee's first name? ",
+            validate: validateString
         },
         {
             name: "last",
             type: "input",
-            message: "What is the employee's last name? "
+            message: "What is the employee's last name? ",
+            validate: validateString
         },
         {
             name: "role",
@@ -362,14 +381,14 @@ function addEmployee() {
         const managerID = employees().indexOf(data.manager) + 1;
         connection.query("INSERT INTO employee SET ?",
             {
-                first_name: data.first,
-                last_name: data.last,
+                first_name: data.first.trim(),
+                last_name: data.last.trim(),
                 role_id: roleID,
                 manager_id: managerID
             },
             function (err, res) {
                 if (err) throw err;
-                console.log("Success! ");
+                console.log("Successfullly added " + data.first.trim());
                 employeeArr = [];
                 viewEmployees();
             });
@@ -381,7 +400,7 @@ function updateRoles() {
         {
             name: "confirm",
             type: "list",
-            message: "INSTRUCTIONS: All roles will be displayed. Select the role that you want to change. \n",
+            message: "INSTRUCTIONS: All roles will be displayed. Select the role you wish to update from the list. \n",
             choices: ["Got it"]
         },
         {
