@@ -305,7 +305,8 @@ function addDepartment() {
         validate: validateString
     }]).then(data => {
         connection.query("INSERT INTO department SET department_name=?", data.department.trim()).then(res => {
-            console.log("Successfully added " + data.department);
+            console.log("Successfully added " + data.department.trim());
+            departmentArr = [];
             viewDepartments();
         });
     })
@@ -341,6 +342,7 @@ async function addRole() {
         VALUES ('${data.title.trim()}', ${data.salary}, ${data.department})`, (err, res) => {
             if (err) throw err;
             console.log("Successfully added " + data.title);
+            roleArr = [];
             viewRoles();
         })
     });
