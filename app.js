@@ -262,9 +262,9 @@ function viewEmployeesByManager() {
                     mainMenu();
                 }
             });
-    })
+    });
 }
-// function to view all roles
+// Function to view all roles
 function viewRoles() {
     // Display chart in console.table()
     connection.query("SELECT r.id AS ID, " +
@@ -297,7 +297,6 @@ async function addRole() {
         name: department_name,
         value: id
     }));
-    console.log(deptArray);
     inquirer.prompt([
         {
             name: "title",
@@ -324,7 +323,7 @@ async function addRole() {
         })
     });
 }
-
+// Function to add new employee
 function addEmployee() {
     inquirer.prompt([
         {
@@ -367,8 +366,51 @@ function addEmployee() {
             });
     })
 }
+// Function to update roles
 function updateRoles() {
-    
+    inquirer.prompt([
+        {
+            name: "confirm",
+            type: "list",
+            message: "INSTRUCTIONS: All roles will be displayed. Select the role that you want to change. \n",
+            choices: ["Got it"]
+        },
+        {
+            name: "role",
+            type: "list",
+            message: "Whiat role do you want to update? ",
+            choices: roles()
+        }
+    ]).then(data => {
+        switch (data.confirm) {
+            case "Got it":
+                break;
+            default: connection.end();
+        }
+        console.log("Updating " + data.role + "...");
+        console.log(data.role);
+        inquirer.prompt([
+            {
+                name: "title",
+                type: "input",
+                message: "Enter the title for the updated role: "
+            }
+        ]).then(updates => {
+            connection.query("UPDATE role SET ? WHERE ?", 
+            [
+                {
+                    title: updates.title
+                },
+                {
+                    title: data.role
+                }
+            ], function(err, res) {
+                if (err) throw err;
+                console.log("Role has been successfully updated");
+                viewRoles();
+            })
+        })
+    });
 }
 // function updateManagers() {
 
