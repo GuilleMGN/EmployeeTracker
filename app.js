@@ -431,6 +431,7 @@ function updateRoles() {
                 ], function (err, res) {
                     if (err) throw err;
                     console.log("Role has been successfully updated");
+                    roleArr = [];
                     viewRoles();
                 })
         })
