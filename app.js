@@ -128,16 +128,13 @@ function updateMenu() {
             name: "action",
             type: "list",
             message: "What would you like to update? ",
-            choices: ["Update Roles", "Update Managers", "<= Back"]
+            choices: ["Update Roles", "<= Back"]
         }
     ]).then((data) => {
         // Based on user answer, call the appropriate functions
         switch (data.action) {
             case "Update Roles":
                 updateRoles();
-                break;
-            case "Update Managers":
-                updateManagers();
                 break;
             case "<= Back":
                 mainMenu();
@@ -174,6 +171,18 @@ function deleteMenu() {
         }
     });
 }
+// Create array for all departments
+let departmentArr = [];
+function departments() {
+    connection.query("SELECT * FROM department", function (err, res) {
+        if (err) throw err;
+        for (var i = 0; i < res.length; i++) {
+            departmentArr.push(res[i].department_name);
+        }
+    });
+    return departmentArr;
+}
+
 // Create array for all roles
 let roleArr = [];
 function roles() {
@@ -185,16 +194,16 @@ function roles() {
     });
     return roleArr;
 }
-// Create array for all employees (potential managers)
-let managerArr = [];
-function managers() {
+// Create array for all employees
+let employeeArr = [];
+function employees() {
     connection.query("SELECT first_name, last_name FROM employee", function (err, res) {
         if (err) throw err;
         for (var i = 0; i < res.length; i++) {
-            managerArr.push(res[i].first_name + " " + res[i].last_name);
+            employeeArr.push(res[i].first_name + " " + res[i].last_name);
         }
     });
-    return managerArr;
+    return employeeArr;
 }
 // Function to view all departments
 function viewDepartments() {
@@ -238,7 +247,7 @@ function viewEmployeesByManager() {
             name: "manager",
             type: "list",
             message: "Which manager's employees do you want to view? ",
-            choices: managers()
+            choices: employees()
         }
     ]).then(data => {
         switch (data.confirm) {
@@ -246,7 +255,7 @@ function viewEmployeesByManager() {
                 break;
             default: connection.end();
         }
-        const managerID = managers().indexOf(data.manager) + 1;
+        const managerID = employees().indexOf(data.manager) + 1;
         console.log("Showing employees working for " + data.manager + "...");
         connection.query("SELECT employee.id AS ID, " +
             "employee.first_name AS FirstName, " +
@@ -346,11 +355,11 @@ function addEmployee() {
             name: "manager",
             type: "list",
             message: "Who is the employee's manager? ",
-            choices: managers()
+            choices: employees()
         }
     ]).then(data => {
         const roleID = roles().indexOf(data.role) + 1;
-        const managerID = managers().indexOf(data.manager) + 1;
+        const managerID = employees().indexOf(data.manager) + 1;
         connection.query("INSERT INTO employee SET ?",
             {
                 first_name: data.first,
@@ -361,7 +370,7 @@ function addEmployee() {
             function (err, res) {
                 if (err) throw err;
                 console.log("Success! ");
-                managerArr = [];
+                employeeArr = [];
                 viewEmployees();
             });
     })
@@ -396,31 +405,97 @@ function updateRoles() {
                 message: "Enter the title for the updated role: "
             }
         ]).then(updates => {
-            connection.query("UPDATE role SET ? WHERE ?", 
-            [
-                {
-                    title: updates.title
-                },
-                {
-                    title: data.role
-                }
-            ], function(err, res) {
-                if (err) throw err;
-                console.log("Role has been successfully updated");
-                viewRoles();
-            })
+            connection.query("UPDATE role SET ? WHERE ?",
+                [
+                    {
+                        title: updates.title
+                    },
+                    {
+                        title: data.role
+                    }
+                ], function (err, res) {
+                    if (err) throw err;
+                    console.log("Role has been successfully updated");
+                    viewRoles();
+                })
         })
     });
 }
-// function updateManagers() {
-
-// }
-// function deleteDepartments() {
-
-// }
-// function deleteRoles() {
-
-// }
-// function deleteEmployees() {
-
-// }
+function deleteDepartments() {
+    inquirer.prompt([
+        {
+            name: "confirm",
+            type: "list",
+            message: "INSTRUCTIONS: All departments will be displayed. Select the department you wish to delete from the list. \n",
+            choices: ["Got it"]
+        },
+        {
+            name: "department",
+            type: "list",
+            message: "Which department would you like to delete? ",
+            choices: departments()
+        }
+    ]).then(data => {
+        console.log(data.department);
+        connection.query("DELETE FROM department WHERE ?",
+            {
+                department_name: data.department
+            }, function (err, res) {
+                if (err) throw err;
+                console.log("Successfully deleted " + data.department);
+                departmentArr = [];
+                viewDepartments();
+            });
+    });
+}
+function deleteRoles() {
+    inquirer.prompt([
+        {
+            name: "confirm",
+            type: "list",
+            message: "INSTRUCTIONS: All roles will be displayed. Select the role you wish to delete from the list. \n",
+            choices: ["Got it"]
+        },
+        {
+            name: "role",
+            type: "list",
+            message: "Which role would you like to delete? ",
+            choices: roles()
+        }
+    ]).then(data => {
+        connection.query("DELETE FROM role WHERE ?",
+            {
+                title: data.role
+            }, function (err, res) {
+                if (err) throw err;
+                console.log("Successfully deleted " + data.role);
+                roleArr = [];
+                viewRoles();
+            });
+    });
+}
+function deleteEmployees() {
+    inquirer.prompt([
+        {
+            name: "confirm",
+            type: "list",
+            message: "INSTRUCTIONS: All employees will be displayed. Select the employee you wish to delete from the list. \n",
+            choices: ["Got it"]
+        },
+        {
+            name: "employee",
+            type: "list",
+            message: "Which employee would you like to delete? ",
+            choices: employees()
+        }
+    ]).then(data => {
+        let names = data.employee,
+            namesArray = names.split(" ");
+        connection.query(`DELETE FROM employee WHERE first_name = '${namesArray[0]}' AND last_name = '${namesArray[1]}'`, function (err, res) {
+            if (err) throw err;
+            console.log("Successfully deleted " + data.employee);
+            employeeArr = [];
+            viewEmployees();
+        });
+    });
+}
